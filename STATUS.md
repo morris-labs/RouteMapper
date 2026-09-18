@@ -40,13 +40,15 @@ still needs DNS.
 - App at `/opt/routemapper`; Express under systemd (`routemapper.service`,
   enabled on boot); nginx config at `/etc/nginx/conf.d/routemapper.conf`
 - Certs at `/etc/nginx/ssl/` (600 privkey, 644 fullchain, root:root)
-- Remaining before it's fully live:
-  - Add 18.216.32.164 to the Google server-key IP allowlist (confirmed
-    blocking live API calls with a 403 right now)
-  - Point morrislabs.app's DNS A record at 18.216.32.164
-  - Re-test through the real domain once both land
+- DNS was already set (A @ -> 18.216.32.164, CNAME www -> morrislabs.app);
+  Google server-key IP allowlist updated. https://morrislabs.app/routemapper/
+  confirmed live, cert fully trusted (ssl_verify_result: 0).
+- Fixed: `/routemapper` (no trailing slash) 404'd -- didn't match the
+  `/routemapper/` prefix location. Added an explicit 301 redirect.
+- `deploy/nginx/routemapper.conf` and `deploy/systemd/routemapper.service`
+  now versioned in the repo (pulled from the live instance) so the deployed
+  config isn't only living on the box.
 
 ## Blockers / decisions pending
 
-- Google server-key IP allowlist (see above).
-- DNS A record (see above).
+None -- app is live at https://morrislabs.app/routemapper/
