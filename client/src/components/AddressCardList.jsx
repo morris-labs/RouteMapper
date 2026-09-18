@@ -1,7 +1,7 @@
 import AddressInput from './AddressInput.jsx';
 
 const MIN_STOPS = 2;
-const MAX_STOPS = 6;
+const MAX_STOPS = 25; // Google Directions API's own waypoint limit
 
 export default function AddressCardList({ addresses, setAddresses }) {
   function updateAt(i, next) {

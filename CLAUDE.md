@@ -2,7 +2,8 @@
 
 A capstone/training project built with AI assistance, intended to demonstrate
 full-stack development ability. The app finds the most efficient route to visit
-4-6 addresses, built with React + Vite (client) and Node.js + Express (server).
+2-25 addresses (Google Directions API's own waypoint limit), built with
+React + Vite (client) and Node.js + Express (server).
 
 ## Project structure
 

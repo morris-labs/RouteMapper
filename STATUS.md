@@ -1,60 +1,31 @@
 # Status
 
-active plan: plan-routemapper.md
-current step: Phase 6 -- Deployment (blocked pending decisions)
+active plan: plan-routemapper.md (v1 complete -- see its "Status" section)
+current step: prepping for a sister app integration
 
 ## Done
 
-- Google Cloud: Maps JS, Places (New), Directions, Distance Matrix enabled
-- Two API keys created; server key includes dev machine IP
-- Domain morrislabs.app + SSL certs ready
-- Phase 1: Express + ESM server (health, autocomplete, route)
-- Phase 2: Vite + React + Tailwind + @vis.gl/react-google-maps scaffold
-- Phase 3: Core UI wired end-to-end
-- Phase 4: FuelEstimator (MPG + price -> gallons, cost)
-- Phase 5: Polish
-  - Turn-by-turn DirectionsAccordion per leg
-  - Mobile-responsive layout (sidebar collapses under md)
-  - Share URL: encoded planner state, copy-link button
-  - Loading and error states already covered in Phase 3
-
-- Post-Phase-5 bug fixes:
-  - AddressInput autocomplete dropdown was clipped by the sidebar's
-    `overflow-y-auto`; now portals to `document.body`, positioned via
-    `getBoundingClientRect` on the input.
-  - Client API calls used an absolute `VITE_API_BASE=http://localhost:3001`,
-    bypassing the Vite dev proxy. Broke autocomplete once the client was
-    reached via port forwarding, since the viewer's browser resolves
-    "localhost" to their own machine. `VITE_API_BASE` is now empty in dev;
-    requests stay relative and route through the Vite proxy.
+- v1 built and deployed: live at https://morrislabs.app/routemapper/.
+  Full build history in `plan-routemapper.md`; deployment architecture,
+  decisions, and every bug fixed along the way in `DEPLOYMENT.md`.
+- Release prep: `README.md`, `LICENSE` (MIT), secrets audit clean (no
+  `.env`/`.pem`/`.key` tracked in git). No GitHub remote yet -- local only.
+- Stop limit expanded from a UI-only 2-6 to 2-25, matching what the
+  `POST /api/route` endpoint already accepted (Google's own Directions API
+  waypoint cap). Changed `MAX_STOPS` in `AddressCardList.jsx`, the sidebar
+  copy in `App.jsx`, and the stale "4-6"/"2-6" references in
+  `README.md`/`CLAUDE.md`. `plan-routemapper.md`'s Goal section keeps the
+  original "4-6" language as a historical record of the original ask.
+- `INTEGRATION.md` added: API reference (endpoints, request/response shapes,
+  CORS/auth posture) for a second agent building the planned sister app
+  against RouteMapper, without needing to read the codebase.
 
 ## Next
 
-Deployed live on AWS EC2 + nginx at `morrislabs.app/routemapper/` (subpath,
-not domain root -- no landing page exists, and the current cert doesn't cover
-a subdomain). Verified working via raw IP + SNI (`--resolve`); real domain
-still needs DNS.
-
-- Instance `routemapper`: Amazon Linux 2023, t3.micro, Elastic IP 18.216.32.164
-- SSH: `ssh -i ~/.ssh/routemapper-key.pem ec2-user@18.216.32.164`
-- App at `/opt/routemapper`; Express under systemd (`routemapper.service`,
-  enabled on boot); nginx config at `/etc/nginx/conf.d/routemapper.conf`
-- Certs at `/etc/nginx/ssl/` (600 privkey, 644 fullchain, root:root)
-- DNS was already set (A @ -> 18.216.32.164, CNAME www -> morrislabs.app);
-  Google server-key IP allowlist updated. https://morrislabs.app/routemapper/
-  confirmed live, cert fully trusted (ssl_verify_result: 0).
-- Fixed: `/routemapper` (no trailing slash) 404'd -- didn't match the
-  `/routemapper/` prefix location. Added an explicit 301 redirect.
-- Fixed: map failed to load (`RefererNotAllowedMapError`) -- the browser
-  key's `*.morrislabs.app/*` referrer entry only covers subdomains, not the
-  apex domain the app is actually served from. Added `morrislabs.app/*` as
-  its own entry.
-- `deploy/nginx/routemapper.conf` and `deploy/systemd/routemapper.service`
-  now versioned in the repo (pulled from the live instance) so the deployed
-  config isn't only living on the box.
-- `DEPLOYMENT.md` added: architecture, key decisions, and every bug hit
-  during the deploy, written up for a reviewer (not just session notes).
+Sister app work hasn't started -- `INTEGRATION.md` is prep for it, not a
+sign work is underway. Revisit this file once that project has a name/repo
+of its own; it may warrant its own `plan-<slug>.md` here or live separately.
 
 ## Blockers / decisions pending
 
-None -- app is live at https://morrislabs.app/routemapper/
+None.

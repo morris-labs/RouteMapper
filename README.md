@@ -1,6 +1,6 @@
 # RouteMapper
 
-A full-stack web app that finds the most efficient route to visit 4-6
+A full-stack web app that finds the most efficient route across a set of
 addresses. Built as a capstone project to demonstrate full-stack development
 ability, with AI assistance throughout.
 
@@ -8,7 +8,8 @@ ability, with AI assistance throughout.
 
 ## Features
 
-- Address autocomplete for 2-6 stops, backed by the Google Places API
+- Address autocomplete for 2-25 stops (Google Directions API's waypoint
+  limit), backed by the Google Places API
 - Route optimization via the Google Directions API's waypoint optimizer
 - Map view with the optimized route and numbered stop markers
 - Turn-by-turn directions per leg

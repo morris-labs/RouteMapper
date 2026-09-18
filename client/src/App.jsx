@@ -87,7 +87,7 @@ export default function App() {
         >
           <h1 className="text-xl font-semibold text-slate-900">RouteMapper</h1>
           <p className="mt-1 text-sm text-slate-500">
-            Enter 2-6 stops to find the most efficient route.
+            Enter 2-25 stops to find the most efficient route.
           </p>
 
           <div className="mt-4">
