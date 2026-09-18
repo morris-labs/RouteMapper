@@ -48,10 +48,14 @@ fun PlanScreen(viewModel: RouteViewModel, onNavigateToMap: () -> Unit) {
         }
     }
 
-    // Navigate to the Map tab only after a new successful route result, not on the button tap
-    // itself -- so any error stays visible on this screen before the user switches tabs.
-    LaunchedEffect(state.routeVersion) {
-        if (state.routeVersion > 0) onNavigateToMap()
+    // Navigate only when a new route version hasn't been consumed yet. Storing the consumed
+    // version in the ViewModel prevents this effect from re-firing when the user returns
+    // to PlanScreen from the Map tab.
+    LaunchedEffect(state.routeVersion, state.navigatedForVersion) {
+        if (state.routeVersion > 0 && state.routeVersion != state.navigatedForVersion) {
+            viewModel.consumeNavigation()
+            onNavigateToMap()
+        }
     }
 
     LazyColumn(

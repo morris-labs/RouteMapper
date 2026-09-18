@@ -25,6 +25,8 @@ data class RouteUiState(
     val route: RouteResponse? = null,
     // Increments on each successful route; lets PlanScreen navigate exactly once per result.
     val routeVersion: Int = 0,
+    // Set to routeVersion once PlanScreen has consumed the navigation event.
+    val navigatedForVersion: Int = 0,
     val loading: Boolean = false,
     val error: String? = null
 )
@@ -59,6 +61,10 @@ class RouteViewModel : ViewModel() {
             addresses = s.addresses.filterIndexed { i, _ -> i != index },
             addressIds = s.addressIds.filterIndexed { i, _ -> i != index }
         )
+    }
+
+    fun consumeNavigation() {
+        _state.value = _state.value.copy(navigatedForVersion = _state.value.routeVersion)
     }
 
     fun updateOptions(options: RouteOptions) {
