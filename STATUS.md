@@ -19,14 +19,15 @@ current step: Android app built; pending live device test
   on a malformed `avoid` field.
 - Native Android app (`mobile/`) built: Kotlin + Jetpack Compose +
   maps-compose. Two-tab layout (Plan / Map). Calls the same production
-  backend. Debug APK built at `mobile/app/build/outputs/apk/debug/app-debug.apk`.
-  Maps key in `mobile/local.properties` (gitignored). Code review by fresh
-  Opus agent in progress -- findings pending.
+  backend. Debug APK at `mobile/app/build/outputs/apk/debug/app-debug.apk`.
+  Maps key in `mobile/local.properties` (gitignored).
+- All 15 Android code review findings fixed and committed (85a2759).
+  Crashes, UX bugs, security, and minor issues all addressed.
 
 ## Next
 
-- Apply Android code review findings
-- Live device test (sideload APK)
+- Live device test (sideload APK from `mobile/app/build/outputs/apk/debug/app-debug.apk`)
+- Lock Android Maps key to package name + SHA-1 fingerprint in Cloud Console
 - Decide whether to push to a GitHub remote
 
 ## Blockers / decisions pending
