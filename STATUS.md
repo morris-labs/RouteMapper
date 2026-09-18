@@ -1,32 +1,32 @@
 # Status
 
 active plan: plan-routemapper.md
-current step: Phase 3 -- Core features (not started)
+current step: Phase 4 -- Fuel estimate (not started)
 
 ## Done
 
 - Google Cloud: Maps JS, Places (New), Directions, Distance Matrix enabled
 - Two API keys created; server key includes dev machine IP
 - Domain morrislabs.app + SSL certs ready
-- Phase 1: Express + ESM server with /api/health,
-  /api/autocomplete (Places API New), /api/route (Directions +
-  optimizeWaypoints). Smoke-tested with curl.
-- Phase 2: Vite + React client with Tailwind and @vis.gl/react-google-maps.
-  Base sidebar + map layout. Vite proxy `/api/*` -> :3001 verified.
-  `npm run build` clean; `npm run dev` from repo root starts both stacks.
+- Phase 1: Express + ESM server (health, autocomplete, route)
+- Phase 2: Vite + React + Tailwind + @vis.gl/react-google-maps scaffold
+- Phase 3: Core UI wired end-to-end
+  - AddressInput with debounced autocomplete + session token
+  - AddressCardList (2-6 stops, add/remove)
+  - OptionsPanel (travel mode, round trip, avoid tolls/highways/ferries)
+  - "Find route" -> POST /api/route
+  - MapPanel: decoded polyline via imperative Polyline, per-stop AdvancedMarkers, fitBounds
+  - ResultsPanel: totals + ordered stops
+  - Server now returns per-leg startLocation/endLocation
 
 ## Next
 
-Phase 3 -- Core features:
-- AddressInput with debounced autocomplete
-- AddressCard list (4-6 slots, add/remove)
-- OptionsPanel (avoid tolls/highways/ferries, round trip, travel mode)
-- "Find Route" button wires POST /api/route
-- MapPanel renders polyline + numbered markers
-- ResultsPanel: ordered stops + totals
+Phase 4 -- Fuel estimate:
+- FuelEstimator component: MPG + gas price inputs
+- Computes gallons and cost from totalMiles
+- Slot into sidebar under ResultsPanel
 
 ## Blockers / decisions pending
 
 - Add production server IP to server-key restriction before deploy.
-- Visual verification of Phase 2 map render was skipped (Chrome
-  extension not connected); user to eyeball or reconnect extension.
+- Visual verification (Chrome extension not connected in this session).

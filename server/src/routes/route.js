@@ -58,6 +58,8 @@ router.post('/', async (req, res, next) => {
     const legs = route.legs.map((leg) => ({
       startAddress: leg.start_address,
       endAddress: leg.end_address,
+      startLocation: leg.start_location,
+      endLocation: leg.end_location,
       distanceMeters: leg.distance.value,
       distanceText: leg.distance.text,
       durationSeconds: leg.duration.value,

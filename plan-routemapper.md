@@ -27,12 +27,12 @@ Google Map with drive time, fuel estimates, and routing options.
 
 ### Phase 3: Core features
 
-- [ ] AddressInput component with autocomplete (debounced, calls `/api/autocomplete`)
-- [ ] AddressCard list (4-6 slots, add/remove)
-- [ ] OptionsPanel: avoid tolls/highways/ferries, round trip toggle, travel mode
-- [ ] "Find Route" button wires up `POST /api/route`
-- [ ] MapPanel renders route polyline + numbered markers
-- [ ] ResultsPanel: ordered stop list, total time and distance
+- [x] AddressInput component with autocomplete (debounced, calls `/api/autocomplete`)
+- [x] AddressCard list (4-6 slots, add/remove)
+- [x] OptionsPanel: avoid tolls/highways/ferries, round trip toggle, travel mode
+- [x] "Find Route" button wires up `POST /api/route`
+- [x] MapPanel renders route polyline + numbered markers
+- [x] ResultsPanel: ordered stop list, total time and distance
 
 ### Phase 4: Fuel estimate
 
