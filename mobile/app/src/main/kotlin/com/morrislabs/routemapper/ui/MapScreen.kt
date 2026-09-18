@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -19,6 +20,9 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.*
 import com.morrislabs.routemapper.data.models.RouteResponse
+import com.morrislabs.routemapper.util.MAPS_NAV_MAX_STOPS
+import com.morrislabs.routemapper.util.buildMapsNavIntent
+import com.morrislabs.routemapper.util.canHandOffToMaps
 import com.morrislabs.routemapper.util.decodePolyline
 import com.morrislabs.routemapper.viewmodel.RouteViewModel
 import kotlin.math.floor
@@ -36,6 +40,7 @@ private data class MarkerData(
 fun MapScreen(viewModel: RouteViewModel) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val route = state.route
+    val context = LocalContext.current
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(LatLng(39.8283, -98.5795), 4f)
@@ -73,6 +78,39 @@ fun MapScreen(viewModel: RouteViewModel) {
                     .padding(16.dp)
             ) {
                 Text("Plan a route to see it here", color = Color(0xFF64748B))
+            }
+        }
+
+        if (route != null) {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (canHandOffToMaps(route)) {
+                    Button(
+                        onClick = {
+                            context.startActivity(
+                                buildMapsNavIntent(route, state.options.travelMode)
+                            )
+                        }
+                    ) {
+                        Text("Navigate in Google Maps")
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .background(Color.White.copy(alpha = 0.9f), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        Text(
+                            "Google Maps navigation supports up to $MAPS_NAV_MAX_STOPS stops",
+                            color = Color(0xFF64748B),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
             }
         }
     }
