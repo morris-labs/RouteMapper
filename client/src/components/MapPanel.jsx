@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Map, AdvancedMarker, InfoWindow, useMap } from '@vis.gl/react-google-maps';
+import { Map, AdvancedMarker, useMap } from '@vis.gl/react-google-maps';
 import { decodePolyline } from '../lib/polyline.js';
 
 function formatDuration(seconds) {
@@ -11,8 +11,6 @@ function formatDuration(seconds) {
 
 const DEFAULT_CENTER = { lat: 39.8283, lng: -98.5795 };
 
-// Renders the route polyline via the imperative Maps JS Polyline API, since
-// @vis.gl/react-google-maps does not ship a declarative Polyline component.
 function RoutePolyline({ path }) {
   const map = useMap();
   useEffect(() => {
@@ -29,7 +27,6 @@ function RoutePolyline({ path }) {
   return null;
 }
 
-// Fits the map viewport to the returned route bounds.
 function FitBounds({ bounds }) {
   const map = useMap();
   useEffect(() => {
@@ -43,11 +40,79 @@ function FitBounds({ bounds }) {
   return null;
 }
 
+function StopMarker({ marker, isHovered, onMouseEnter, onMouseLeave }) {
+  return (
+    <div
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      style={{ position: 'relative', cursor: 'pointer' }}
+    >
+      <div
+        style={{
+          background: '#2563eb',
+          border: '2px solid #1e40af',
+          borderRadius: '50%',
+          width: 28,
+          height: 28,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: '#fff',
+          fontSize: 11,
+          fontWeight: 700,
+          boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+        }}
+      >
+        {marker.label}
+      </div>
+
+      {isHovered && (
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 'calc(100% + 8px)',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: '#fff',
+            border: '1px solid #e2e8f0',
+            borderRadius: 6,
+            padding: '8px 10px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            whiteSpace: 'nowrap',
+            zIndex: 9999,
+            pointerEvents: 'none',
+            fontFamily: 'system-ui, sans-serif',
+            fontSize: 13,
+            minWidth: 180,
+          }}
+        >
+          <div style={{ fontWeight: 700, color: '#111827', marginBottom: 2 }}>
+            Stop {marker.label}
+          </div>
+          <div style={{ color: '#374151', marginBottom: 4, whiteSpace: 'normal', maxWidth: 240 }}>
+            {marker.address}
+          </div>
+          {marker.cumSeconds === 0 ? (
+            <div style={{ color: '#6b7280', fontSize: 12 }}>Starting point</div>
+          ) : (
+            <>
+              <div style={{ color: '#2563eb', fontSize: 12, fontWeight: 600 }}>
+                +{formatDuration(marker.cumSeconds)} from start
+              </div>
+              <div style={{ color: '#6b7280', fontSize: 12, marginTop: 2 }}>
+                {marker.legDuration} &middot; {marker.legDistance} from prev
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function MapPanel({ route }) {
   const [hoveredIdx, setHoveredIdx] = useState(null);
 
-  // Concatenate per-step polylines for full road-accurate geometry.
-  // overview_polyline is a simplified approximation that cuts corners at high zoom.
   const path = useMemo(() => {
     if (!route?.legs) return [];
     return route.legs.flatMap((leg) =>
@@ -80,8 +145,6 @@ export default function MapPanel({ route }) {
     return points;
   }, [route]);
 
-  const hovered = hoveredIdx !== null ? markers[hoveredIdx] : null;
-
   return (
     <Map
       mapId="routemapper"
@@ -93,62 +156,15 @@ export default function MapPanel({ route }) {
       <RoutePolyline path={path} />
       <FitBounds bounds={route?.bounds} />
       {markers.map((m, i) => (
-        <AdvancedMarker key={i} position={m.position}>
-          <div
+        <AdvancedMarker key={i} position={m.position} zIndex={hoveredIdx === i ? 100 : 1}>
+          <StopMarker
+            marker={m}
+            isHovered={hoveredIdx === i}
             onMouseEnter={() => setHoveredIdx(i)}
             onMouseLeave={() => setHoveredIdx(null)}
-            style={{ display: 'contents' }}
-          >
-            <div
-              style={{
-                background: '#2563eb',
-                border: '2px solid #1e40af',
-                borderRadius: '50%',
-                width: 28,
-                height: 28,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#fff',
-                fontSize: 11,
-                fontWeight: 700,
-                cursor: 'pointer',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
-              }}
-            >
-              {m.label}
-            </div>
-          </div>
+          />
         </AdvancedMarker>
       ))}
-      {hovered && (
-        <InfoWindow
-          position={hovered.position}
-          disableAutoPan
-          onCloseClick={() => setHoveredIdx(null)}
-        >
-          <div style={{ fontFamily: 'sans-serif', fontSize: 13, maxWidth: 220 }}>
-            <div style={{ fontWeight: 700, marginBottom: 2 }}>
-              Stop {hovered.label}
-            </div>
-            <div style={{ color: '#374151', marginBottom: 4 }}>
-              {hovered.address}
-            </div>
-            {hovered.cumSeconds === 0 ? (
-              <div style={{ color: '#6b7280', fontSize: 12 }}>Starting point</div>
-            ) : (
-              <>
-                <div style={{ color: '#2563eb', fontSize: 12 }}>
-                  +{formatDuration(hovered.cumSeconds)} from start
-                </div>
-                <div style={{ color: '#6b7280', fontSize: 12, marginTop: 2 }}>
-                  {hovered.legDuration} &middot; {hovered.legDistance} from previous stop
-                </div>
-              </>
-            )}
-          </div>
-        </InfoWindow>
-      )}
     </Map>
   );
 }
