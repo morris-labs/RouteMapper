@@ -42,10 +42,10 @@ Google Map with drive time, fuel estimates, and routing options.
 
 ### Phase 5: Polish
 
-- [ ] Loading states and error handling
-- [ ] Mobile-responsive layout
-- [ ] Turn-by-turn directions accordion per leg
-- [ ] "Share route" URL encoding (optional)
+- [x] Loading states and error handling
+- [x] Mobile-responsive layout
+- [x] Turn-by-turn directions accordion per leg
+- [x] "Share route" URL encoding (optional)
 
 ### Phase 6: Deployment
 
