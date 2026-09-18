@@ -40,13 +40,9 @@ function FitBounds({ bounds }) {
   return null;
 }
 
-function StopMarker({ marker, isHovered, onMouseEnter, onMouseLeave }) {
+function StopMarker({ marker, isHovered }) {
   return (
-    <div
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-      style={{ position: 'relative', cursor: 'pointer' }}
-    >
+    <div style={{ position: 'relative', cursor: 'pointer' }}>
       <div
         style={{
           background: '#2563eb',
@@ -152,17 +148,18 @@ export default function MapPanel({ route }) {
       defaultZoom={4}
       gestureHandling="greedy"
       style={{ width: '100%', height: '100%' }}
+      onClick={() => setHoveredIdx(null)}
     >
       <RoutePolyline path={path} />
       <FitBounds bounds={route?.bounds} />
       {markers.map((m, i) => (
-        <AdvancedMarker key={i} position={m.position} zIndex={hoveredIdx === i ? 100 : 1}>
-          <StopMarker
-            marker={m}
-            isHovered={hoveredIdx === i}
-            onMouseEnter={() => setHoveredIdx(i)}
-            onMouseLeave={() => setHoveredIdx(null)}
-          />
+        <AdvancedMarker
+          key={i}
+          position={m.position}
+          zIndex={hoveredIdx === i ? 100 : 1}
+          onClick={() => setHoveredIdx(hoveredIdx === i ? null : i)}
+        >
+          <StopMarker marker={m} isHovered={hoveredIdx === i} />
         </AdvancedMarker>
       ))}
     </Map>
