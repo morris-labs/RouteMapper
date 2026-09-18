@@ -11,14 +11,16 @@ React + Vite (client) and Node.js + Express (server).
 routemapper/
   client/     React + Vite + Tailwind frontend
   server/     Node.js + Express API backend
+  mobile/     Native Android app (Kotlin + Jetpack Compose)
   deploy/     nginx and systemd configs, versioned from the live EC2 instance
 ```
 
 ## Tech stack
 
 - **Frontend**: React 18, Vite, Tailwind CSS, @vis.gl/react-google-maps
+- **Android**: Kotlin, Jetpack Compose, maps-compose 4.x, OkHttp, Gson
 - **Backend**: Node.js (ESM), Express 4
-- **APIs**: Google Maps JavaScript API (browser), Directions API + Places API (server)
+- **APIs**: Google Maps JavaScript API (browser), Maps SDK for Android, Directions API + Places API (server)
 
 ## Environment variables
 
@@ -28,6 +30,11 @@ routemapper/
 
 `client/.env`:
 - `VITE_GOOGLE_MAPS_BROWSER_KEY` -- Google API key restricted to Maps JavaScript API
+
+`mobile/local.properties` (gitignored -- never commit this file):
+- `sdk.dir` -- path to your Android SDK installation
+- `ANDROID_MAPS_KEY` -- Google API key restricted to Maps SDK for Android, bound to
+  package `com.morrislabs.routemapper` + the debug keystore SHA-1
 - `VITE_API_BASE` -- Leave empty in dev. Requests to `/api/*` stay relative and go
   through the Vite dev proxy (`vite.config.js`), which forwards to the Express
   server. This matters when the client is reached via a port-forwarded or remote

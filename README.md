@@ -16,15 +16,17 @@ ability, with AI assistance throughout.
 - Route options: avoid tolls, avoid highways, avoid ferries, round trip,
   travel mode
 - Fuel cost estimate from your vehicle's MPG and a local gas price
-- Shareable route URLs
-- Mobile-responsive layout
+- Shareable route URLs that open in the web app or the Android app
+- Mobile-responsive web layout
+- Native Android app (`mobile/`) built with Kotlin + Jetpack Compose
 
 ## Tech stack
 
-- **Frontend**: React 18, Vite, Tailwind CSS, `@vis.gl/react-google-maps`
-- **Backend**: Node.js (ESM), Express 4
-- **APIs**: Google Maps JavaScript API (browser), Directions API + Places
-  API (server)
+- **Web frontend**: React 18, Vite, Tailwind CSS, `@vis.gl/react-google-maps`
+- **Android app**: Kotlin, Jetpack Compose, `maps-compose`, OkHttp
+- **Backend**: Node.js (ESM), Express 4 (shared by both clients)
+- **APIs**: Google Maps JavaScript API (browser), Maps SDK for Android,
+  Directions API + Places API (server)
 - **Deployment**: AWS EC2, nginx, systemd -- see [`DEPLOYMENT.md`](DEPLOYMENT.md)
 
 ## Architecture
@@ -38,13 +40,17 @@ server key never reaches the browser.
 routemapper/
   client/   React + Vite + Tailwind frontend
   server/   Node.js + Express API backend
+  mobile/   Native Android app (Kotlin + Jetpack Compose)
   deploy/   nginx and systemd configs from the live instance
 ```
 
 ## Getting started
 
 Requires Node 22 and a Google Cloud project with the Maps JavaScript,
-Places, Directions, and Distance Matrix APIs enabled.
+Places, Directions, and Distance Matrix APIs enabled. The Android app
+additionally requires the Maps SDK for Android enabled and a separate
+Android-restricted API key placed in `mobile/local.properties` as
+`ANDROID_MAPS_KEY`.
 
 ```bash
 npm run install:all

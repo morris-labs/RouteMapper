@@ -1,7 +1,7 @@
 # Status
 
 active plan: plan-routemapper.md (v1 complete -- see its "Status" section)
-current step: prepping for a sister app integration
+current step: Android app built; pending live device test
 
 ## Done
 
@@ -12,34 +12,27 @@ current step: prepping for a sister app integration
   `.env`/`.pem`/`.key` tracked in git). No GitHub remote yet -- local only.
 - Stop limit expanded from a UI-only 2-6 to 2-25, matching what the
   `POST /api/route` endpoint already accepted (Google's own Directions API
-  waypoint cap). Changed `MAX_STOPS` in `AddressCardList.jsx`, the sidebar
-  copy in `App.jsx`, and the stale "4-6"/"2-6" references in
-  `README.md`/`CLAUDE.md`. `plan-routemapper.md`'s Goal section keeps the
-  original "4-6" language as a historical record of the original ask.
-- `INTEGRATION.md` added: API reference (endpoints, request/response shapes,
-  CORS/auth posture) for a second agent building the planned sister app
-  against RouteMapper, without needing to read the codebase.
-- Independent code review (fresh Opus 5 agent, no prior context) found 11
-  real issues; all fixed, deployed, and verified live. Worst one: a request
-  with `avoid` as a non-array crashed the whole Express process (unhandled
-  rejection outside the try block) -- confirmed exploitable with a single
-  curl call before the fix, confirmed dead after. Full list of findings and
-  fixes in the `git log` message for that commit. Also added nginx
-  `limit_req` on the API path, since neither endpoint had any rate limiting
-  despite spending quota on the Google server key with no auth.
-- Fixed local-only: TLS private key and SSH key files in the working tree
-  were `0664` (world-readable). `chmod 600`. Already gitignored/untracked,
-  not a repo exposure, but no reason to leave them loose on disk.
+  waypoint cap).
+- `INTEGRATION.md` added: API reference for a potential sister app.
+- Independent code review (fresh Opus 5 agent) found 11 real issues; all
+  fixed and deployed. Worst: unhandled rejection crashed the Express process
+  on a malformed `avoid` field.
+- Native Android app (`mobile/`) built: Kotlin + Jetpack Compose +
+  maps-compose. Two-tab layout (Plan / Map). Calls the same production
+  backend. Debug APK built at `mobile/app/build/outputs/apk/debug/app-debug.apk`.
+  Maps key in `mobile/local.properties` (gitignored). Code review by fresh
+  Opus agent in progress -- findings pending.
 
 ## Next
 
-Sister app work hasn't started -- `INTEGRATION.md` is prep for it, not a
-sign work is underway. Revisit this file once that project has a name/repo
-of its own; it may warrant its own `plan-<slug>.md` here or live separately.
+- Apply Android code review findings
+- Live device test (sideload APK)
+- Decide whether to push to a GitHub remote
 
 ## Blockers / decisions pending
 
-- Google Cloud server-key daily quota cap: not configured anywhere. The new
-  nginx rate limit caps abuse per-IP, but a distributed hammer or a legitimate
-  traffic spike could still run up the bill. Needs a console visit, can't be
-  set from here.
+- Google Cloud server-key daily quota cap: not configured. The nginx rate
+  limit caps per-IP abuse but a distributed spike could still run up the bill.
+  Needs a console visit.
+- Android Maps key is currently unrestricted -- should be locked to package
+  name + SHA-1 fingerprint once live testing confirms everything works.
