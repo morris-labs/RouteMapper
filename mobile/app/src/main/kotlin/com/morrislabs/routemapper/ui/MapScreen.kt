@@ -41,7 +41,11 @@ fun MapScreen(viewModel: RouteViewModel) {
         position = CameraPosition.fromLatLngZoom(LatLng(39.8283, -98.5795), 4f)
     }
 
-    LaunchedEffect(route?.bounds) {
+    // mapLoaded gates the camera update: newLatLngBounds throws if the map has zero size.
+    var mapLoaded by remember { mutableStateOf(false) }
+
+    LaunchedEffect(route?.bounds, mapLoaded) {
+        if (!mapLoaded) return@LaunchedEffect
         route?.bounds?.let { b ->
             val bounds = LatLngBounds(
                 LatLng(b.southwest.lat, b.southwest.lng),
@@ -55,7 +59,8 @@ fun MapScreen(viewModel: RouteViewModel) {
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
-            uiSettings = MapUiSettings(zoomControlsEnabled = true)
+            uiSettings = MapUiSettings(zoomControlsEnabled = true),
+            onMapLoaded = { mapLoaded = true }
         ) {
             if (route != null) RouteOverlay(route = route)
         }
@@ -75,10 +80,13 @@ fun MapScreen(viewModel: RouteViewModel) {
 
 @Composable
 private fun RouteOverlay(route: RouteResponse) {
+    val legs = route.legs ?: return
+    if (legs.isEmpty()) return
+
     var selectedMarker by remember { mutableStateOf<Int?>(null) }
 
     val path = remember(route) {
-        route.legs.flatMap { leg ->
+        legs.flatMap { leg ->
             leg.steps.flatMap { step ->
                 step.polyline?.let { decodePolyline(it) } ?: emptyList()
             }
@@ -88,17 +96,18 @@ private fun RouteOverlay(route: RouteResponse) {
     val markers = remember(route) {
         var cumSeconds = 0
         val pts = mutableListOf<MarkerData>()
+        val first = legs.first()
         pts.add(
             MarkerData(
-                position = LatLng(route.legs.first().startLocation.lat, route.legs.first().startLocation.lng),
+                position = LatLng(first.startLocation.lat, first.startLocation.lng),
                 label = "1",
-                address = route.legs.first().startAddress,
+                address = first.startAddress,
                 cumSeconds = 0,
                 legDuration = null,
                 legDistance = null
             )
         )
-        route.legs.forEachIndexed { i, leg ->
+        legs.forEachIndexed { i, leg ->
             cumSeconds += leg.durationSeconds
             pts.add(
                 MarkerData(
@@ -117,8 +126,17 @@ private fun RouteOverlay(route: RouteResponse) {
     Polyline(points = path, color = Color(0xFF2563EB), width = 10f)
 
     markers.forEachIndexed { i, marker ->
+        // keys: marker identity + selection state. Without both, the info card never appears
+        // because Compose skips recomposition when it thinks nothing changed.
         MarkerComposable(
-            state = rememberMarkerState(position = marker.position),
+            marker.label,
+            selectedMarker == i,
+            state = rememberMarkerState(
+                // Include position in the key so stale LatLng values are not reused if
+                // the user computes a second route with different stops.
+                key = "${marker.label}_${marker.position.latitude}_${marker.position.longitude}",
+                position = marker.position
+            ),
             anchor = androidx.compose.ui.geometry.Offset(0.5f, 1f),
             zIndex = if (selectedMarker == i) 1f else 0f,
             onClick = {

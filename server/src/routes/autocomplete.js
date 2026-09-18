@@ -3,16 +3,20 @@ import { Router } from 'express';
 const router = Router();
 
 // Proxies Places API (New) Autocomplete so the server key stays out of the browser.
+// Accepts GET (web app) and POST (Android app -- keeps the typed address out of access logs).
 // Docs: https://developers.google.com/maps/documentation/places/web-service/place-autocomplete
-router.get('/', async (req, res, next) => {
-  const input = String(req.query.input ?? '').trim();
+router.all('/', async (req, res, next) => {
+  const input = String(
+    (req.method === 'POST' ? req.body?.input : req.query.input) ?? ''
+  ).trim();
   if (!input) {
-    res.status(400).json({ error: 'missing_input', message: 'Pass ?input=...' });
+    res.status(400).json({ error: 'missing_input', message: 'Pass ?input=... or {input} in body.' });
     return;
   }
 
+  const sessiontoken = req.method === 'POST' ? req.body?.sessiontoken : req.query.sessiontoken;
   const body = { input, includedPrimaryTypes: ['street_address', 'premise', 'subpremise'] };
-  if (req.query.sessiontoken) body.sessionToken = String(req.query.sessiontoken);
+  if (sessiontoken) body.sessionToken = String(sessiontoken);
 
   try {
     const upstream = await fetch('https://places.googleapis.com/v1/places:autocomplete', {

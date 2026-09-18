@@ -67,7 +67,7 @@ fun AddressCard(
                     placeholder = when {
                         isStart -> "Starting address"
                         isEnd -> "Ending address (optional)"
-                        else -> "Stop ${index + 1}"
+                        else -> "Stop $index"
                     }
                 )
             }

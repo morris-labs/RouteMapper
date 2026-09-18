@@ -13,8 +13,9 @@ fun FuelEstimator(totalMiles: Double) {
     var mpg by remember { mutableStateOf("") }
     var pricePerGallon by remember { mutableStateOf("") }
 
-    val mpgVal = mpg.toDoubleOrNull()
-    val priceVal = pricePerGallon.toDoubleOrNull()
+    // Normalize decimal separator so comma-locale keyboards (e.g. de, fr) parse correctly.
+    val mpgVal = mpg.replace(",", ".").toDoubleOrNull()
+    val priceVal = pricePerGallon.replace(",", ".").toDoubleOrNull()
     val cost = if (mpgVal != null && mpgVal > 0 && priceVal != null) {
         (totalMiles / mpgVal) * priceVal
     } else null

@@ -18,15 +18,18 @@ data class RouteOptions(
 
 data class RouteUiState(
     val addresses: List<String> = listOf("", ""),
+    // Stable per-slot IDs so LazyColumn keys don't shift on removal.
+    val addressIds: List<Long> = listOf(0L, 1L),
+    val nextAddressId: Long = 2L,
     val options: RouteOptions = RouteOptions(),
     val route: RouteResponse? = null,
+    // Increments on each successful route; lets PlanScreen navigate exactly once per result.
+    val routeVersion: Int = 0,
     val loading: Boolean = false,
     val error: String? = null
 )
 
 class RouteViewModel : ViewModel() {
-    private val api = RouteApiService()
-
     private val _state = MutableStateFlow(RouteUiState())
     val state: StateFlow<RouteUiState> = _state.asStateFlow()
 
@@ -37,17 +40,24 @@ class RouteViewModel : ViewModel() {
     }
 
     fun addStop() {
-        val addresses = _state.value.addresses
-        if (addresses.size >= 25) return
-        val updated = addresses.toMutableList().apply { add(size - 1, "") }
-        _state.value = _state.value.copy(addresses = updated)
+        val s = _state.value
+        if (s.addresses.size >= 25) return
+        val insertAt = s.addresses.size - 1
+        val newAddresses = s.addresses.toMutableList().apply { add(insertAt, "") }
+        val newIds = s.addressIds.toMutableList().apply { add(insertAt, s.nextAddressId) }
+        _state.value = s.copy(
+            addresses = newAddresses,
+            addressIds = newIds,
+            nextAddressId = s.nextAddressId + 1
+        )
     }
 
     fun removeStop(index: Int) {
-        val addresses = _state.value.addresses
-        if (index == 0 || index == addresses.size - 1) return
-        _state.value = _state.value.copy(
-            addresses = addresses.filterIndexed { i, _ -> i != index }
+        val s = _state.value
+        if (index == 0 || index == s.addresses.size - 1) return
+        _state.value = s.copy(
+            addresses = s.addresses.filterIndexed { i, _ -> i != index },
+            addressIds = s.addressIds.filterIndexed { i, _ -> i != index }
         )
     }
 
@@ -71,7 +81,7 @@ class RouteViewModel : ViewModel() {
         viewModelScope.launch {
             _state.value = _state.value.copy(loading = true, error = null)
             try {
-                val result = api.findRoute(
+                val result = RouteApiService.findRoute(
                     RouteRequest(
                         addresses = apiAddresses,
                         roundTrip = s.options.roundTrip,
@@ -79,9 +89,17 @@ class RouteViewModel : ViewModel() {
                         avoid = s.options.avoid
                     )
                 )
-                _state.value = _state.value.copy(loading = false, route = result)
+                _state.value = _state.value.copy(
+                    loading = false,
+                    route = result,
+                    routeVersion = _state.value.routeVersion + 1
+                )
             } catch (e: Exception) {
-                _state.value = _state.value.copy(loading = false, error = e.message ?: "Unknown error")
+                _state.value = _state.value.copy(
+                    loading = false,
+                    error = e.message ?: "Unknown error",
+                    route = null
+                )
             }
         }
     }

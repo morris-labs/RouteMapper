@@ -13,6 +13,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.morrislabs.routemapper.ui.components.*
 import com.morrislabs.routemapper.util.encodeShareUrl
 import com.morrislabs.routemapper.viewmodel.RouteViewModel
+import kotlinx.coroutines.delay
 
 @Composable
 fun PlanScreen(viewModel: RouteViewModel, onNavigateToMap: () -> Unit) {
@@ -29,8 +30,29 @@ fun PlanScreen(viewModel: RouteViewModel, onNavigateToMap: () -> Unit) {
         endAddr.isNotEmpty() || middleAddrs.isNotEmpty()
     }
 
+    // Effective address list that was (or will be) sent to the API.
+    val shareAddresses = when {
+        state.options.roundTrip -> listOf(startAddr) + middleAddrs
+        endAddr.isNotEmpty() -> listOf(startAddr) + middleAddrs + endAddr
+        else -> listOf(startAddr) + middleAddrs
+    }
+
     var copied by remember { mutableStateOf(false) }
     val clipboard = LocalClipboardManager.current
+
+    // Reset the copy confirmation after a short delay (mirrors web app behaviour).
+    LaunchedEffect(copied) {
+        if (copied) {
+            delay(1500)
+            copied = false
+        }
+    }
+
+    // Navigate to the Map tab only after a new successful route result, not on the button tap
+    // itself -- so any error stays visible on this screen before the user switches tabs.
+    LaunchedEffect(state.routeVersion) {
+        if (state.routeVersion > 0) onNavigateToMap()
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -47,7 +69,12 @@ fun PlanScreen(viewModel: RouteViewModel, onNavigateToMap: () -> Unit) {
             Spacer(Modifier.height(4.dp))
         }
 
-        itemsIndexed(addresses) { i, addr ->
+        // key = stable slot ID so autocomplete state doesn't bleed to the wrong card
+        // after a stop is removed from the middle of the list.
+        itemsIndexed(
+            items = addresses,
+            key = { i, _ -> state.addressIds.getOrElse(i) { i.toLong() } }
+        ) { i, addr ->
             AddressCard(
                 index = i,
                 address = addr,
@@ -76,10 +103,7 @@ fun PlanScreen(viewModel: RouteViewModel, onNavigateToMap: () -> Unit) {
 
         item {
             Button(
-                onClick = {
-                    viewModel.findRoute()
-                    if (hasRoute) onNavigateToMap()
-                },
+                onClick = { viewModel.findRoute() },
                 enabled = hasRoute && !state.loading,
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -105,7 +129,7 @@ fun PlanScreen(viewModel: RouteViewModel, onNavigateToMap: () -> Unit) {
             item {
                 OutlinedButton(
                     onClick = {
-                        clipboard.setText(AnnotatedString(encodeShareUrl(addresses, state.options)))
+                        clipboard.setText(AnnotatedString(encodeShareUrl(shareAddresses, state.options)))
                         copied = true
                     },
                     modifier = Modifier.fillMaxWidth()

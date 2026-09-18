@@ -53,7 +53,15 @@ fun DirectionsAccordion(route: RouteResponse) {
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Column {
-                                    val plainText = step.instructionHtml.replace(Regex("<[^>]*>"), "")
+                                    val plainText = step.instructionHtml
+                                        .replace(Regex("<[^>]*>"), "")
+                                        .replace("&amp;", "&")
+                                        .replace("&lt;", "<")
+                                        .replace("&gt;", ">")
+                                        .replace("&nbsp;", " ")
+                                        .replace("&quot;", "\"")
+                                        .replace("&#39;", "'")
+                                        .trim()
                                     Text(plainText, style = MaterialTheme.typography.bodySmall)
                                     Text(
                                         "${step.distanceText} · ${step.durationText}",

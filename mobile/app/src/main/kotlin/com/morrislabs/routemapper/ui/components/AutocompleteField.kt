@@ -13,7 +13,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-private val sharedApi = RouteApiService()
+// Uses the singleton object -- no separate OkHttpClient instance.
 
 @Composable
 fun AutocompleteField(
@@ -36,7 +36,7 @@ fun AutocompleteField(
                 if (v.length >= 2) {
                     debounceJob = scope.launch {
                         delay(300)
-                        suggestions = try { sharedApi.autocomplete(v) } catch (_: Exception) { emptyList() }
+                        suggestions = try { RouteApiService.autocomplete(v) } catch (_: Exception) { emptyList() }
                     }
                 } else {
                     suggestions = emptyList()

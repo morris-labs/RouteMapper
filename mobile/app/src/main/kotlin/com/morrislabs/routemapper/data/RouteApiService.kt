@@ -12,45 +12,48 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
-import java.net.URLEncoder
+import java.util.concurrent.TimeUnit
 
-class RouteApiService {
-    private val client = OkHttpClient()
+// Singleton: one connection pool shared by all callers (ViewModel + AutocompleteField).
+object RouteApiService {
+    private val client = OkHttpClient.Builder()
+        .callTimeout(10, TimeUnit.SECONDS)
+        .followSslRedirects(false)
+        .build()
     private val gson = Gson()
-    private val baseUrl = "https://morrislabs.app/api"
-    private val json = "application/json".toMediaType()
+    private const val BASE_URL = "https://morrislabs.app/api"
+    private val JSON = "application/json".toMediaType()
 
     suspend fun findRoute(request: RouteRequest): RouteResponse = withContext(Dispatchers.IO) {
-        val body = gson.toJson(request).toRequestBody(json)
-        val req = Request.Builder()
-            .url("$baseUrl/route")
-            .post(body)
-            .build()
+        val body = gson.toJson(request).toRequestBody(JSON)
+        val req = Request.Builder().url("$BASE_URL/route").post(body).build()
 
         client.newCall(req).execute().use { response ->
-            val responseBody = response.body?.string() ?: throw IOException("Empty response")
+            val text = response.body?.string() ?: throw IOException("Empty response")
             if (!response.isSuccessful) {
-                val error = try {
-                    gson.fromJson(responseBody, ErrorResponse::class.java)
-                } catch (_: Exception) {
-                    ErrorResponse("error", "Request failed (${response.code})")
-                }
-                throw IOException(error.message)
+                val err = try { gson.fromJson(text, ErrorResponse::class.java) }
+                          catch (_: Exception) { ErrorResponse("error", "Request failed (${response.code})") }
+                throw IOException(err.message)
             }
-            gson.fromJson(responseBody, RouteResponse::class.java)
+            val result = gson.fromJson(text, RouteResponse::class.java)
+                ?: throw IOException("Invalid response format")
+            if (result.legs == null) throw IOException("Invalid response: missing route data")
+            if (result.legs.isEmpty()) throw IOException("Route returned no stops")
+            result
         }
     }
 
+    // POST keeps typed addresses out of the nginx access log query strings.
     suspend fun autocomplete(input: String): List<String> = withContext(Dispatchers.IO) {
         if (input.isBlank()) return@withContext emptyList()
-        val encoded = URLEncoder.encode(input, "UTF-8")
-        val req = Request.Builder().url("$baseUrl/autocomplete?input=$encoded").build()
+        val body = gson.toJson(mapOf("input" to input)).toRequestBody(JSON)
+        val req = Request.Builder().url("$BASE_URL/autocomplete").post(body).build()
 
         client.newCall(req).execute().use { response ->
             if (!response.isSuccessful) return@withContext emptyList()
-            val body = response.body?.string() ?: return@withContext emptyList()
+            val text = response.body?.string() ?: return@withContext emptyList()
             val type = object : TypeToken<Map<String, Any>>() {}.type
-            val map: Map<String, Any> = gson.fromJson(body, type)
+            val map: Map<String, Any> = gson.fromJson(text, type)
             @Suppress("UNCHECKED_CAST")
             val predictions = map["predictions"] as? List<Map<String, Any>> ?: return@withContext emptyList()
             predictions.mapNotNull { it["description"] as? String }

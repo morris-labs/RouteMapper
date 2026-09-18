@@ -19,8 +19,9 @@ fun ResultsPanel(route: RouteResponse) {
         Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text("Route summary", style = MaterialTheme.typography.titleSmall)
             Text("$durationText  ·  $distanceMiles mi", style = MaterialTheme.typography.bodyMedium)
+            val stopCount = route.orderedStops.size
             Text(
-                "${route.legs.size} stop${if (route.legs.size != 1) "s" else ""}",
+                "$stopCount stop${if (stopCount != 1) "s" else ""}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

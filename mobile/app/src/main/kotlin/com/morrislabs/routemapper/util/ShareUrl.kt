@@ -10,9 +10,9 @@ fun encodeShareUrl(addresses: List<String>, options: RouteOptions): String {
     addresses.map { it.trim() }.filter { it.isNotEmpty() }.forEach { addr ->
         params.add("a=${URLEncoder.encode(addr, "UTF-8")}")
     }
-    if (options.travelMode != "driving") params.add("mode=${options.travelMode}")
+    if (options.travelMode != "driving") params.add("mode=${URLEncoder.encode(options.travelMode, "UTF-8")}")
     if (options.roundTrip) params.add("round=1")
-    options.avoid.forEach { params.add("avoid=$it") }
+    options.avoid.forEach { params.add("avoid=${URLEncoder.encode(it, "UTF-8")}") }
 
     return if (params.isEmpty()) base else "$base?${params.joinToString("&")}"
 }

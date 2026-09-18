@@ -13,6 +13,7 @@ fun decodePolyline(encoded: String): List<LatLng> {
         var value = 0
         var b: Int
         do {
+            if (index >= encoded.length) return result
             b = encoded[index++].code - 63
             value = value or ((b and 0x1f) shl shift)
             shift += 5
@@ -22,6 +23,7 @@ fun decodePolyline(encoded: String): List<LatLng> {
         shift = 0
         value = 0
         do {
+            if (index >= encoded.length) return result
             b = encoded[index++].code - 63
             value = value or ((b and 0x1f) shl shift)
             shift += 5
