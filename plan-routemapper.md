@@ -36,9 +36,9 @@ Google Map with drive time, fuel estimates, and routing options.
 
 ### Phase 4: Fuel estimate
 
-- [ ] FuelEstimator component: MPG input + gas price input
-- [ ] Calculates `(totalMiles / mpg) * gasPrice`
-- [ ] Displays gallons used + estimated cost
+- [x] FuelEstimator component: MPG input + gas price input
+- [x] Calculates `(totalMiles / mpg) * gasPrice`
+- [x] Displays gallons used + estimated cost
 
 ### Phase 5: Polish
 

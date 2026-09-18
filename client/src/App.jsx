@@ -4,6 +4,7 @@ import AddressCardList from './components/AddressCardList.jsx';
 import OptionsPanel from './components/OptionsPanel.jsx';
 import MapPanel from './components/MapPanel.jsx';
 import ResultsPanel from './components/ResultsPanel.jsx';
+import FuelEstimator from './components/FuelEstimator.jsx';
 import { fetchRoute } from './lib/api.js';
 
 const apiKey = import.meta.env.VITE_GOOGLE_MAPS_BROWSER_KEY;
@@ -72,8 +73,11 @@ export default function App() {
           )}
 
           {route && (
-            <div className="mt-4">
+            <div className="mt-4 space-y-3">
               <ResultsPanel route={route} />
+              {options.travelMode === 'driving' && (
+                <FuelEstimator totalMiles={route.totalDistanceMiles} />
+              )}
             </div>
           )}
         </aside>
