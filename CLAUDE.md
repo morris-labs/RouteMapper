@@ -26,7 +26,12 @@ routemapper/
 
 `client/.env`:
 - `VITE_GOOGLE_MAPS_BROWSER_KEY` -- Google API key restricted to Maps JavaScript API
-- `VITE_API_BASE` -- Backend base URL (default: `http://localhost:3001`)
+- `VITE_API_BASE` -- Leave empty in dev. Requests to `/api/*` stay relative and go
+  through the Vite dev proxy (`vite.config.js`), which forwards to the Express
+  server. This matters when the client is reached via a port-forwarded or remote
+  host, where a hardcoded `http://localhost:3001` would resolve on the viewer's
+  machine instead of the dev box. Set to an absolute URL only for a production
+  build served separately from the API.
 
 ## Backend endpoints
 
