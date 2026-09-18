@@ -19,12 +19,13 @@ Express (systemd service, auto-restarts on crash or reboot)
 Google Maps Platform (Directions, Places, Distance Matrix APIs)
 ```
 
-- **Instance**: `routemapper`, Amazon Linux 2023, `t3.micro`, Elastic IP `18.216.32.164`
+- **Instance**: `routemapper`, Amazon Linux 2023, `t3.micro`, with an
+  Elastic IP (not published here -- see the AWS console)
 - **Reverse proxy**: nginx, config versioned at `deploy/nginx/routemapper.conf`
 - **App process**: Node 22 running Express under systemd, unit versioned at
   `deploy/systemd/routemapper.service`
 - **App location on the instance**: `/opt/routemapper`
-- **DNS**: GoDaddy, `A @ -> 18.216.32.164`, `CNAME www -> morrislabs.app`
+- **DNS**: GoDaddy, `A @ -> <instance Elastic IP>`, `CNAME www -> morrislabs.app`
 - **TLS**: GoDaddy-issued certificate for `morrislabs.app` and `www.morrislabs.app`
 
 ## Key decisions
@@ -116,13 +117,14 @@ No CI/CD pipeline exists; deploys are manual and intentional:
 # From the repo root, package tracked source (skips node_modules, .env, certs)
 git archive --format=tar HEAD | gzip > /tmp/routemapper.tar.gz
 
-# Ship it
-scp -i ~/.ssh/routemapper-key.pem /tmp/routemapper.tar.gz ec2-user@18.216.32.164:/tmp/
-ssh -i ~/.ssh/routemapper-key.pem ec2-user@18.216.32.164 \
+# Ship it -- SSH_KEY and EC2_HOST are your own key pair path and instance
+# address; not published here, see AWS console / your own notes.
+scp -i "$SSH_KEY" /tmp/routemapper.tar.gz ec2-user@"$EC2_HOST":/tmp/
+ssh -i "$SSH_KEY" ec2-user@"$EC2_HOST" \
   "tar -xzf /tmp/routemapper.tar.gz -C /opt/routemapper && rm /tmp/routemapper.tar.gz"
 
 # Rebuild the client, restart the API
-ssh -i ~/.ssh/routemapper-key.pem ec2-user@18.216.32.164 \
+ssh -i "$SSH_KEY" ec2-user@"$EC2_HOST" \
   "cd /opt/routemapper/client && npm run build && sudo systemctl restart routemapper"
 ```
 

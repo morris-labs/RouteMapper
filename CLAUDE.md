@@ -64,9 +64,10 @@ Two separate Google API keys -- this is Google's recommended split:
   `localhost:5173/*`, `morrislabs.app/*`, `*.morrislabs.app/*` -- a leading
   `*.` matches subdomains only, not the apex domain, so both entries are
   required to cover `morrislabs.app` itself and any subdomain.
-- **Server key**: IP-restricted to `127.0.0.1` (local dev) and the EC2
-  Elastic IP `18.216.32.164` (production). Restricted to Directions API,
-  Places API, Distance Matrix API. Never sent to the browser.
+- **Server key**: IP-restricted to `127.0.0.1` (local dev) and the production
+  EC2 instance's Elastic IP (see internal deployment notes, not published
+  here). Restricted to Directions API, Places API, Distance Matrix API.
+  Never sent to the browser.
 
 All substantive API calls (routing, autocomplete) go through the Express backend.
 The browser key is only used to load the map tile renderer.
