@@ -1,6 +1,8 @@
-// Thin fetch wrappers for the RouteMapper API. In dev, calls go through the
-// Vite proxy; in production, `VITE_API_BASE` is baked into the build.
-const API_BASE = import.meta.env.VITE_API_BASE ?? '';
+// Thin fetch wrappers for the RouteMapper API. A leading-slash fetch path
+// always resolves from the domain root, not the page's own base path, so
+// fall back to Vite's BASE_URL (e.g. /routemapper/ in production) rather
+// than an empty string -- otherwise API calls miss the deployed subpath.
+const API_BASE = import.meta.env.VITE_API_BASE || import.meta.env.BASE_URL.replace(/\/$/, '');
 
 async function request(path, init = {}) {
   const res = await fetch(`${API_BASE}${path}`, {

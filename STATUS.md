@@ -30,12 +30,23 @@ current step: Phase 6 -- Deployment (blocked pending decisions)
 
 ## Next
 
-Deployment target changed: hosting on AWS instead of this box. Phase 6 plan
-needs to be reworked for AWS -- service choice (EC2 vs. ECS/Fargate vs.
-Elastic Beanstalk vs. Amplify+Lambda), reverse proxy/SSL approach, and whether
-morrislabs.app DNS points there.
+Deployed live on AWS EC2 + nginx at `morrislabs.app/routemapper/` (subpath,
+not domain root -- no landing page exists, and the current cert doesn't cover
+a subdomain). Verified working via raw IP + SNI (`--resolve`); real domain
+still needs DNS.
+
+- Instance `routemapper`: Amazon Linux 2023, t3.micro, Elastic IP 18.216.32.164
+- SSH: `ssh -i ~/.ssh/routemapper-key.pem ec2-user@18.216.32.164`
+- App at `/opt/routemapper`; Express under systemd (`routemapper.service`,
+  enabled on boot); nginx config at `/etc/nginx/conf.d/routemapper.conf`
+- Certs at `/etc/nginx/ssl/` (600 privkey, 644 fullchain, root:root)
+- Remaining before it's fully live:
+  - Add 18.216.32.164 to the Google server-key IP allowlist (confirmed
+    blocking live API calls with a 403 right now)
+  - Point morrislabs.app's DNS A record at 18.216.32.164
+  - Re-test through the real domain once both land
 
 ## Blockers / decisions pending
 
-- AWS hosting approach not yet chosen (see Next).
-- Add production server IP to server-key restriction before deploy.
+- Google server-key IP allowlist (see above).
+- DNS A record (see above).
