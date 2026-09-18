@@ -21,9 +21,13 @@ app.use('/api/route', routeRouter);
 
 app.use((err, _req, res, _next) => {
   console.error(err);
-  res.status(500).json({ error: 'internal_error', message: err.message });
+  const status = err.status ?? err.statusCode ?? 500;
+  const message = status >= 500 ? 'Internal server error' : err.message;
+  res.status(status).json({ error: 'internal_error', message });
 });
 
-app.listen(port, () => {
-  console.log(`RouteMapper server listening on http://localhost:${port}`);
+// nginx is the only thing that should reach this process; bind to loopback
+// so a security group change or a second app on the box can't expose it.
+app.listen(port, '127.0.0.1', () => {
+  console.log(`RouteMapper server listening on http://127.0.0.1:${port}`);
 });

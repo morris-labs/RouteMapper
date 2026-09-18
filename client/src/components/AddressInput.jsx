@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { fetchAutocomplete } from '../lib/api.js';
 import { useDebounced } from '../hooks/useDebounced.js';
@@ -17,16 +17,31 @@ export default function AddressInput({ value, onChange, placeholder }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [menuRect, setMenuRect] = useState(null);
-  const sessionToken = useMemo(newSessionToken, []);
+  const [sessionToken, setSessionToken] = useState(newSessionToken);
   const debounced = useDebounced(query, 250);
   const wrapperRef = useRef(null);
   const inputRef = useRef(null);
   const menuRef = useRef(null);
-
-  useEffect(() => setQuery(value ?? ''), [value]);
+  // Tracks the last text a prediction was selected for, so the effect below
+  // can skip re-querying immediately after a selection without needing
+  // `value` to stay lazy -- `onChange` now fires on every keystroke, so
+  // comparing against `value` directly would suppress fetching on ordinary
+  // typing too, since the parent updates in lockstep.
+  const lastSelectedRef = useRef(value ?? '');
+  // The value emitted to onChange can be a `place_id:...` reference (not
+  // human-readable), which must not overwrite the visible query text -- so
+  // only resync from `value` when it changed for a reason other than this
+  // instance's own emission (external reset, initial mount, etc).
+  const lastEmittedRef = useRef(value ?? '');
 
   useEffect(() => {
-    if (!debounced || debounced === value) {
+    if (value === lastEmittedRef.current) return;
+    setQuery(value ?? '');
+    lastEmittedRef.current = value ?? '';
+  }, [value]);
+
+  useEffect(() => {
+    if (!debounced || debounced === lastSelectedRef.current) {
       setPredictions([]);
       return undefined;
     }
@@ -39,7 +54,7 @@ export default function AddressInput({ value, onChange, placeholder }) {
       })
       .finally(() => setLoading(false));
     return () => ctrl.abort();
-  }, [debounced, sessionToken, value]);
+  }, [debounced, sessionToken]);
 
   useEffect(() => {
     function handleDocClick(e) {
@@ -68,10 +83,18 @@ export default function AddressInput({ value, onChange, placeholder }) {
   }, [open]);
 
   function selectPrediction(p) {
+    // Directions accepts `place_id:ID` directly as an address, no separate
+    // Place Details call needed -- more precise than re-geocoding free text.
+    const address = p.placeId ? `place_id:${p.placeId}` : p.description;
     setQuery(p.description);
+    lastSelectedRef.current = p.description;
+    lastEmittedRef.current = address;
     setPredictions([]);
     setOpen(false);
-    onChange(p.description);
+    onChange(address);
+    // A session ends once a prediction is used; start a fresh one so the
+    // next search groups its own keystrokes for Google's billing.
+    setSessionToken(newSessionToken());
   }
 
   const showMenu = open && (predictions.length > 0 || loading) && menuRect;
@@ -84,6 +107,8 @@ export default function AddressInput({ value, onChange, placeholder }) {
         value={query}
         onChange={(e) => {
           setQuery(e.target.value);
+          lastEmittedRef.current = e.target.value;
+          onChange(e.target.value);
           setOpen(true);
         }}
         onFocus={() => setOpen(true)}

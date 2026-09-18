@@ -3,6 +3,36 @@ import { Router } from 'express';
 const router = Router();
 
 const TRAVEL_MODES = new Set(['driving', 'walking', 'bicycling', 'transit']);
+const AVOID_OPTIONS = new Set(['tolls', 'highways', 'ferries']);
+const MAX_ADDRESS_LENGTH = 200;
+
+// Directions statuses caused by the request itself, not an upstream/config
+// failure -- these become 400s with a message the user can act on.
+const USER_ERROR_STATUSES = {
+  ZERO_RESULTS: 'No route could be found between those stops.',
+  NOT_FOUND: 'At least one address could not be located.',
+  INVALID_REQUEST: 'The route request was invalid.',
+  MAX_WAYPOINTS_EXCEEDED: 'Too many stops for a single route.',
+};
+
+function isValidAddress(a) {
+  return typeof a === 'string' && a.trim().length > 0 && a.length <= MAX_ADDRESS_LENGTH && !a.includes('|');
+}
+
+// Directions instructions come from Google, not user input, but the client
+// renders them with dangerouslySetInnerHTML -- strip anything outside this
+// small allowlist (and any attributes on what's left) before it goes out.
+const ALLOWED_INSTRUCTION_TAGS = new Set(['b', 'div', 'wbr']);
+
+function sanitizeInstructionHtml(html) {
+  return String(html ?? '').replace(/<\/?([a-zA-Z0-9]+)[^>]*>/g, (match, tag) => {
+    const name = tag.toLowerCase();
+    if (!ALLOWED_INSTRUCTION_TAGS.has(name)) return '';
+    if (match.startsWith('</')) return `</${name}>`;
+    if (match.endsWith('/>')) return `<${name}/>`;
+    return `<${name}>`;
+  });
+}
 
 // Body:
 //   {
@@ -22,8 +52,16 @@ router.post('/', async (req, res, next) => {
     res.status(400).json({ error: 'bad_request', message: 'addresses may not exceed 25 stops' });
     return;
   }
+  if (!addresses.every(isValidAddress)) {
+    res.status(400).json({ error: 'bad_request', message: `each address must be a non-empty string, at most ${MAX_ADDRESS_LENGTH} characters, and not contain "|"` });
+    return;
+  }
   if (!TRAVEL_MODES.has(travelMode)) {
     res.status(400).json({ error: 'bad_request', message: `travelMode must be one of ${[...TRAVEL_MODES].join(', ')}` });
+    return;
+  }
+  if (!Array.isArray(avoid) || !avoid.every((a) => AVOID_OPTIONS.has(a))) {
+    res.status(400).json({ error: 'bad_request', message: `avoid must be an array containing only: ${[...AVOID_OPTIONS].join(', ')}` });
     return;
   }
 
@@ -47,10 +85,15 @@ router.post('/', async (req, res, next) => {
   const url = `https://maps.googleapis.com/maps/api/directions/json?${params}`;
 
   try {
-    const upstream = await fetch(url);
+    const upstream = await fetch(url, { signal: AbortSignal.timeout(8000) });
     const data = await upstream.json();
     if (data.status !== 'OK') {
-      res.status(502).json({ error: 'directions_error', status: data.status, message: data.error_message });
+      const userMessage = USER_ERROR_STATUSES[data.status];
+      if (userMessage) {
+        res.status(400).json({ error: 'bad_request', status: data.status, message: userMessage });
+        return;
+      }
+      res.status(502).json({ error: 'directions_error', status: data.status, message: data.error_message ?? 'The Directions API request failed.' });
       return;
     }
 
@@ -65,7 +108,7 @@ router.post('/', async (req, res, next) => {
       durationSeconds: leg.duration.value,
       durationText: leg.duration.text,
       steps: leg.steps.map((s) => ({
-        instructionHtml: s.html_instructions,
+        instructionHtml: sanitizeInstructionHtml(s.html_instructions),
         distanceText: s.distance.text,
         durationText: s.duration.text,
       })),
@@ -86,6 +129,10 @@ router.post('/', async (req, res, next) => {
       bounds: route.bounds ?? null,
     });
   } catch (err) {
+    if (err.name === 'TimeoutError') {
+      res.status(504).json({ error: 'upstream_timeout', message: 'The Directions API did not respond in time.' });
+      return;
+    }
     next(err);
   }
 });

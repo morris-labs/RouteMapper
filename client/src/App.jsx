@@ -22,7 +22,7 @@ function loadInitialState() {
 }
 
 export default function App() {
-  const initial = loadInitialState();
+  const [initial] = useState(loadInitialState);
   const [addresses, setAddresses] = useState(initial.addresses);
   const [options, setOptions] = useState(initial.options);
   const [route, setRoute] = useState(null);

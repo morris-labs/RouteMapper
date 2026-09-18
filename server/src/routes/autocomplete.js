@@ -22,6 +22,7 @@ router.get('/', async (req, res, next) => {
         'X-Goog-Api-Key': process.env.GOOGLE_SERVER_KEY,
       },
       body: JSON.stringify(body),
+      signal: AbortSignal.timeout(8000),
     });
     const data = await upstream.json();
     if (!upstream.ok) {
@@ -39,6 +40,10 @@ router.get('/', async (req, res, next) => {
         })),
     });
   } catch (err) {
+    if (err.name === 'TimeoutError') {
+      res.status(504).json({ error: 'upstream_timeout', message: 'The Places API did not respond in time.' });
+      return;
+    }
     next(err);
   }
 });
