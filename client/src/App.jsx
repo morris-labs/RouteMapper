@@ -18,7 +18,7 @@ function loadInitialState() {
   if (decoded.addresses.length >= 2) {
     return { addresses: decoded.addresses, options: { ...DEFAULT_OPTIONS, ...decoded.options } };
   }
-  return { addresses: ['', '', ''], options: DEFAULT_OPTIONS };
+  return { addresses: ['', ''], options: DEFAULT_OPTIONS };
 }
 
 export default function App() {
@@ -31,8 +31,19 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const filled = addresses.map((a) => a.trim()).filter(Boolean);
-  const canSubmit = filled.length >= 2 && !loading;
+  const startAddr = addresses[0]?.trim() ?? '';
+  const endAddr = addresses[addresses.length - 1]?.trim() ?? '';
+  const middleAddrs = addresses.slice(1, -1).map((a) => a.trim()).filter(Boolean);
+
+  // For URL sync: encode all non-empty addresses preserving their positions.
+  const filled = [startAddr, ...middleAddrs, ...(endAddr ? [endAddr] : [])];
+
+  // Round-trip needs start + at least one waypoint; one-way needs start + end or
+  // at least one middle stop (the last filled stop becomes the destination).
+  const hasRoute = startAddr.length > 0 && (
+    options.roundTrip ? middleAddrs.length > 0 : endAddr.length > 0 || middleAddrs.length > 0
+  );
+  const canSubmit = hasRoute && !loading;
 
   // Keep the URL in sync with planner state so the current view is shareable.
   useEffect(() => {
@@ -45,8 +56,14 @@ export default function App() {
     setLoading(true);
     setError(null);
     try {
-      const result = await fetchRoute({
-        addresses: filled,
+      const apiAddresses = options.roundTrip
+      ? [startAddr, ...middleAddrs]
+      : endAddr
+        ? [startAddr, ...middleAddrs, endAddr]
+        : [startAddr, ...middleAddrs];
+
+    const result = await fetchRoute({
+        addresses: apiAddresses,
         roundTrip: options.roundTrip,
         travelMode: options.travelMode,
         avoid: options.avoid,
@@ -91,7 +108,7 @@ export default function App() {
           </p>
 
           <div className="mt-4">
-            <AddressCardList addresses={addresses} setAddresses={setAddresses} />
+            <AddressCardList addresses={addresses} setAddresses={setAddresses} roundTrip={options.roundTrip} />
           </div>
 
           <div className="mt-4">
