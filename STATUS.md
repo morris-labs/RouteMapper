@@ -45,9 +45,15 @@ still needs DNS.
   confirmed live, cert fully trusted (ssl_verify_result: 0).
 - Fixed: `/routemapper` (no trailing slash) 404'd -- didn't match the
   `/routemapper/` prefix location. Added an explicit 301 redirect.
+- Fixed: map failed to load (`RefererNotAllowedMapError`) -- the browser
+  key's `*.morrislabs.app/*` referrer entry only covers subdomains, not the
+  apex domain the app is actually served from. Added `morrislabs.app/*` as
+  its own entry.
 - `deploy/nginx/routemapper.conf` and `deploy/systemd/routemapper.service`
   now versioned in the repo (pulled from the live instance) so the deployed
   config isn't only living on the box.
+- `DEPLOYMENT.md` added: architecture, key decisions, and every bug hit
+  during the deploy, written up for a reviewer (not just session notes).
 
 ## Blockers / decisions pending
 

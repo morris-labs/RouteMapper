@@ -10,6 +10,7 @@ full-stack development ability. The app finds the most efficient route to visit
 routemapper/
   client/     React + Vite + Tailwind frontend
   server/     Node.js + Express API backend
+  deploy/     nginx and systemd configs, versioned from the live EC2 instance
 ```
 
 ## Tech stack
@@ -49,16 +50,22 @@ cd server && npm run dev
 cd client && npm run dev
 ```
 
-Production domain: morrislabs.app (SSL certs already obtained and ready to wire in)
+Live at https://morrislabs.app/routemapper/ -- see `DEPLOYMENT.md` for the
+full deployment architecture, decisions, and the debugging notes from
+standing it up.
 
 ## API key strategy
 
 Two separate Google API keys -- this is Google's recommended split:
 
-- **Browser key**: HTTP-referrer restricted to `localhost:5173/*` and `morrislabs.app/*`.
-  Restricted to Maps JavaScript API only. Loaded in the client to render the map.
-- **Server key**: IP-restricted to `127.0.0.1` (add production server IP when deploying).
-  Restricted to Directions API, Places API, Distance Matrix API. Never sent to the browser.
+- **Browser key**: HTTP-referrer restricted. Restricted to Maps JavaScript
+  API only. Loaded in the client to render the map. Website restrictions:
+  `localhost:5173/*`, `morrislabs.app/*`, `*.morrislabs.app/*` -- a leading
+  `*.` matches subdomains only, not the apex domain, so both entries are
+  required to cover `morrislabs.app` itself and any subdomain.
+- **Server key**: IP-restricted to `127.0.0.1` (local dev) and the EC2
+  Elastic IP `18.216.32.164` (production). Restricted to Directions API,
+  Places API, Distance Matrix API. Never sent to the browser.
 
 All substantive API calls (routing, autocomplete) go through the Express backend.
 The browser key is only used to load the map tile renderer.
