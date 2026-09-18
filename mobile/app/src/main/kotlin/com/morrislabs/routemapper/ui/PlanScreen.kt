@@ -11,6 +11,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.morrislabs.routemapper.ui.components.*
+import com.morrislabs.routemapper.util.MAPS_NAV_MAX_STOPS
 import com.morrislabs.routemapper.util.encodeShareUrl
 import com.morrislabs.routemapper.viewmodel.RouteViewModel
 import kotlinx.coroutines.delay
@@ -131,9 +132,12 @@ fun PlanScreen(viewModel: RouteViewModel, onNavigateToMap: () -> Unit) {
             item { ResultsPanel(route = route) }
 
             item {
+                // Use orderedStops (optimized order) and cap at the Maps limit so the
+                // share link stays consistent with what the Navigate button will navigate.
+                val linkStops = route.orderedStops.take(MAPS_NAV_MAX_STOPS)
                 OutlinedButton(
                     onClick = {
-                        clipboard.setText(AnnotatedString(encodeShareUrl(shareAddresses, state.options)))
+                        clipboard.setText(AnnotatedString(encodeShareUrl(linkStops, state.options)))
                         copied = true
                     },
                     modifier = Modifier.fillMaxWidth()
