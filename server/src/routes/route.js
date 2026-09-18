@@ -111,6 +111,7 @@ router.post('/', async (req, res, next) => {
         instructionHtml: sanitizeInstructionHtml(s.html_instructions),
         distanceText: s.distance.text,
         durationText: s.duration.text,
+        polyline: s.polyline?.points ?? null,
       })),
     }));
 

@@ -37,10 +37,14 @@ function FitBounds({ bounds }) {
 }
 
 export default function MapPanel({ route }) {
-  const path = useMemo(
-    () => (route?.overviewPolyline ? decodePolyline(route.overviewPolyline) : []),
-    [route?.overviewPolyline],
-  );
+  // Concatenate per-step polylines for full road-accurate geometry.
+  // overview_polyline is a simplified approximation that cuts corners at high zoom.
+  const path = useMemo(() => {
+    if (!route?.legs) return [];
+    return route.legs.flatMap((leg) =>
+      leg.steps.flatMap((step) => (step.polyline ? decodePolyline(step.polyline) : [])),
+    );
+  }, [route?.legs]);
 
   const markers = useMemo(() => {
     if (!route?.legs?.length) return [];
