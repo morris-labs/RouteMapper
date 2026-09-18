@@ -22,7 +22,6 @@ import com.google.maps.android.compose.*
 import com.morrislabs.routemapper.data.models.RouteResponse
 import com.morrislabs.routemapper.util.MAPS_NAV_MAX_STOPS
 import com.morrislabs.routemapper.util.buildMapsNavIntent
-import com.morrislabs.routemapper.util.canHandOffToMaps
 import com.morrislabs.routemapper.util.decodePolyline
 import com.morrislabs.routemapper.viewmodel.RouteViewModel
 import kotlin.math.floor
@@ -82,34 +81,28 @@ fun MapScreen(viewModel: RouteViewModel) {
         }
 
         if (route != null) {
+            val truncated = route.orderedStops.size > MAPS_NAV_MAX_STOPS
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (canHandOffToMaps(route)) {
-                    Button(
-                        onClick = {
-                            context.startActivity(
-                                buildMapsNavIntent(route, state.options.travelMode)
-                            )
-                        }
-                    ) {
-                        Text("Navigate in Google Maps")
-                    }
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .background(Color.White.copy(alpha = 0.9f), RoundedCornerShape(8.dp))
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                    ) {
-                        Text(
-                            "Google Maps navigation supports up to $MAPS_NAV_MAX_STOPS stops",
-                            color = Color(0xFF64748B),
-                            style = MaterialTheme.typography.bodySmall
+                Button(
+                    onClick = {
+                        context.startActivity(
+                            buildMapsNavIntent(route, state.options.travelMode)
                         )
                     }
+                ) {
+                    Text("Navigate in Google Maps")
+                }
+                if (truncated) {
+                    Text(
+                        "First $MAPS_NAV_MAX_STOPS of ${route.orderedStops.size} stops (Maps limit)",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color(0xFF64748B)
+                    )
                 }
             }
         }

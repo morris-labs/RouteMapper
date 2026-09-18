@@ -8,11 +8,9 @@ import java.net.URLEncoder
 // Maps URL waypoints are capped at 9 intermediate stops (origin + 9 + destination = 11 total).
 const val MAPS_NAV_MAX_STOPS = 11
 
-fun canHandOffToMaps(route: RouteResponse): Boolean =
-    route.orderedStops.size <= MAPS_NAV_MAX_STOPS
-
 fun buildMapsNavIntent(route: RouteResponse, travelMode: String): Intent {
-    val stops = route.orderedStops
+    // Truncate to the Maps cap; the first MAPS_NAV_MAX_STOPS stops in optimized order.
+    val stops = route.orderedStops.take(MAPS_NAV_MAX_STOPS)
     fun enc(s: String) = URLEncoder.encode(s, "UTF-8")
 
     val url = buildString {
