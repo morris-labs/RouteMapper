@@ -21,7 +21,7 @@ object RouteApiService {
         .followSslRedirects(false)
         .build()
     private val gson = Gson()
-    private const val BASE_URL = "https://morrislabs.app/api"
+    private const val BASE_URL = "https://morrislabs.app/routemapper/api"
     private val JSON = "application/json".toMediaType()
 
     suspend fun findRoute(request: RouteRequest): RouteResponse = withContext(Dispatchers.IO) {
