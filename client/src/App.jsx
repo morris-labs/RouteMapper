@@ -13,12 +13,12 @@ const apiKey = import.meta.env.VITE_GOOGLE_MAPS_BROWSER_KEY;
 const DEFAULT_OPTIONS = { travelMode: 'driving', roundTrip: false, avoid: [] };
 
 function loadInitialState() {
-  if (typeof window === 'undefined') return { addresses: ['', '', ''], options: DEFAULT_OPTIONS };
+  if (typeof window === 'undefined') return { addresses: ['', '', '', ''], options: DEFAULT_OPTIONS };
   const decoded = decodeState(window.location.search);
   if (decoded.addresses.length >= 2) {
     return { addresses: decoded.addresses, options: { ...DEFAULT_OPTIONS, ...decoded.options } };
   }
-  return { addresses: ['', ''], options: DEFAULT_OPTIONS };
+  return { addresses: ['', '', '', ''], options: DEFAULT_OPTIONS };
 }
 
 export default function App() {
