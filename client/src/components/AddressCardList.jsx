@@ -72,8 +72,8 @@ export default function AddressCardList({ addresses, setAddresses, roundTrip }) 
 
       {/* Other stops section */}
       <div className="flex items-center justify-between pt-1">
-        <span className="text-xs font-medium text-slate-500">Other stops</span>
-        <span className="text-xs text-slate-400">{middleAddresses.length} of {MAX_STOPS - 2}</span>
+        <span className="text-xs font-medium text-[--ml-muted]">Other stops</span>
+        <span className="text-xs text-[--ml-muted]">{middleAddresses.length} of {MAX_STOPS - 2}</span>
       </div>
 
       {middleAddresses.map((addr, i) => (

@@ -76,11 +76,15 @@ validation failed), `502` if the upstream Directions API call fails
 
 ### `GET /api/autocomplete?input=<text>&sessiontoken=<optional>`
 
-Proxies Google Places Autocomplete (New), restricted to
-`street_address`, `premise`, and `subpremise` types. `sessiontoken` is
-optional but recommended if you're building a keystroke-by-keystroke
-search box -- it groups a user's autocomplete requests with their eventual
-selection for Google's billing.
+Proxies Google Places Autocomplete (New). Returns all geocodable place
+types -- addresses, cities, states, postal codes, landmarks -- so callers
+can enter partial or abbreviated input (e.g. "Richmond, VA" or "OH") and
+get useful suggestions. `sessiontoken` is optional but recommended if
+you're building a keystroke-by-keystroke search box -- it groups a user's
+autocomplete requests with their eventual selection for Google's billing.
+
+Also accepts `POST` with a JSON body `{"input":"...","sessiontoken":"..."}`.
+The POST form keeps the typed string out of nginx access logs.
 
 Response (`200`):
 

@@ -99,13 +99,13 @@ export default function App() {
         <button
           type="button"
           onClick={() => setSidebarOpen((v) => !v)}
-          className="absolute right-3 top-3 z-20 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow ring-1 ring-slate-200 md:hidden"
+          className="absolute right-3 top-3 z-20 rounded-md bg-[--ml-surface] px-3 py-1.5 text-sm font-medium text-[--ml-ink] shadow ring-1 ring-[--ml-border] md:hidden"
         >
           {sidebarOpen ? 'Close' : 'Plan route'}
         </button>
 
         <aside
-          className={`${sidebarOpen ? 'block' : 'hidden'} h-full w-full shrink-0 overflow-y-auto border-r border-[--ml-border] bg-[--ml-surface] p-4 md:block md:w-96`}
+          className={`${sidebarOpen ? 'block' : 'hidden'} h-full w-full shrink-0 overflow-y-auto border-r border-[--ml-border] bg-[--ml-sidebar] p-4 md:block md:w-96`}
         >
           <h1 className="text-xl font-semibold text-[--ml-ink]" style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700 }}>RouteMapper</h1>
           <p className="mt-1 text-sm text-[--ml-muted]">

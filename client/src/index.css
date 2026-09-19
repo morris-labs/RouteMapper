@@ -4,7 +4,8 @@
 
 /* MorrisLabs design tokens */
 :root {
-  --ml-ground:     #F4F7FB;
+  --ml-ground:     #E5EDF7;
+  --ml-sidebar:    #E5EDF7;
   --ml-surface:    #FFFFFF;
   --ml-ink:        #0D1B2A;
   --ml-muted:      #5A6E82;
@@ -16,6 +17,7 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --ml-ground:    #0C1620;
+    --ml-sidebar:   #0C1620;
     --ml-surface:   #162030;
     --ml-ink:       #E4EDF7;
     --ml-muted:     #6E90B0;
@@ -27,6 +29,7 @@
 
 :root[data-theme="dark"] {
   --ml-ground:    #0C1620;
+  --ml-sidebar:   #0C1620;
   --ml-surface:   #162030;
   --ml-ink:       #E4EDF7;
   --ml-muted:     #6E90B0;
