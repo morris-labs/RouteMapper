@@ -2,6 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
+/* MorrisLabs design tokens */
+:root {
+  --ml-ground:     #F4F7FB;
+  --ml-surface:    #FFFFFF;
+  --ml-ink:        #0D1B2A;
+  --ml-muted:      #5A6E82;
+  --ml-accent-fg:  #1D68E1;
+  --ml-accent-bg:  #EBF2FE;
+  --ml-border:     #DCE5F0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ml-ground:    #0C1620;
+    --ml-surface:   #162030;
+    --ml-ink:       #E4EDF7;
+    --ml-muted:     #6E90B0;
+    --ml-accent-fg: #4F90F5;
+    --ml-accent-bg: #0F2040;
+    --ml-border:    #1F3048;
+  }
+}
+
+:root[data-theme="dark"] {
+  --ml-ground:    #0C1620;
+  --ml-surface:   #162030;
+  --ml-ink:       #E4EDF7;
+  --ml-muted:     #6E90B0;
+  --ml-accent-fg: #4F90F5;
+  --ml-accent-bg: #0F2040;
+  --ml-border:    #1F3048;
+}
+
 html, body, #root {
-  height: 100%;
+  min-height: 100%;
 }

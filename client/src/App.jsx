@@ -6,6 +6,8 @@ import MapPanel from './components/MapPanel.jsx';
 import ResultsPanel from './components/ResultsPanel.jsx';
 import FuelEstimator from './components/FuelEstimator.jsx';
 import DirectionsAccordion from './components/DirectionsAccordion.jsx';
+import Header from './components/Header.jsx';
+import Footer from './components/Footer.jsx';
 import { fetchRoute } from './lib/api.js';
 import { decodeState, encodeState } from './lib/shareUrl.js';
 
@@ -90,7 +92,10 @@ export default function App() {
 
   return (
     <APIProvider apiKey={apiKey}>
-      <div className="relative flex h-full flex-col md:flex-row">
+      <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <Header currentApp="routemapper" />
+      <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+      <div className="absolute inset-0 flex flex-col md:flex-row">
         <button
           type="button"
           onClick={() => setSidebarOpen((v) => !v)}
@@ -150,6 +155,9 @@ export default function App() {
         <main className="h-full flex-1">
           <MapPanel route={route} />
         </main>
+      </div>
+      </div>
+      <Footer />
       </div>
     </APIProvider>
   );
