@@ -25,10 +25,10 @@ current step: ready for GitHub push
   `--ml-*` CSS tokens, sticky header with Apps dropdown, copyright footer.
   All sidebar components migrated from Tailwind slate/blue to ML tokens.
 - morrislabs.app homepage built and deployed (separate repo).
+- RouteMapper pushed to GitHub: https://github.com/morris-labs/RouteMapper
 
 ## Next
 
-- Push both repos to GitHub
 - Lock Android Maps key to package name + SHA-1 in Cloud Console
 - Live device test (sideload debug APK)
 
