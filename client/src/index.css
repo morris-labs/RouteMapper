@@ -38,3 +38,9 @@
 html, body, #root {
   min-height: 100%;
 }
+
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background-color: var(--ml-ground);
+  color: var(--ml-ink);
+}

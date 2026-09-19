@@ -105,10 +105,10 @@ export default function App() {
         </button>
 
         <aside
-          className={`${sidebarOpen ? 'block' : 'hidden'} h-full w-full shrink-0 overflow-y-auto border-r border-slate-200 bg-slate-50 p-4 md:block md:w-96`}
+          className={`${sidebarOpen ? 'block' : 'hidden'} h-full w-full shrink-0 overflow-y-auto border-r border-[--ml-border] bg-[--ml-surface] p-4 md:block md:w-96`}
         >
-          <h1 className="text-xl font-semibold text-slate-900">RouteMapper</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="text-xl font-semibold text-[--ml-ink]" style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700 }}>RouteMapper</h1>
+          <p className="mt-1 text-sm text-[--ml-muted]">
             Enter 2-25 stops to find the most efficient route.
           </p>
 
@@ -124,7 +124,7 @@ export default function App() {
             type="button"
             onClick={onFindRoute}
             disabled={!canSubmit}
-            className="mt-4 w-full rounded-md bg-blue-600 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-4 w-full rounded-md bg-[--ml-accent-fg] py-2 text-sm font-medium text-white shadow-sm hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? 'Finding route…' : 'Find route'}
           </button>
@@ -144,7 +144,7 @@ export default function App() {
               <button
                 type="button"
                 onClick={onCopyShare}
-                className="w-full rounded-md border border-slate-300 bg-white py-1.5 text-sm text-slate-700 hover:bg-slate-100"
+                className="w-full rounded-md border border-[--ml-border] bg-[--ml-surface] py-1.5 text-sm text-[--ml-muted] hover:bg-[--ml-ground]"
               >
                 {copied ? 'Link copied' : 'Copy share link'}
               </button>

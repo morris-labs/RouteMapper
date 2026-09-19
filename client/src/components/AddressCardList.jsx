@@ -27,7 +27,7 @@ export default function AddressCardList({ addresses, setAddresses, roundTrip }) 
   }
 
   const badge = (label, color) => (
-    <div className={`mt-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${color} text-xs font-semibold text-white`}>
+    <div className={`mt-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white ${color}`}>
       {label}
     </div>
   );
@@ -36,7 +36,7 @@ export default function AddressCardList({ addresses, setAddresses, roundTrip }) 
     <div className="space-y-2">
       {/* Origin — always pinned first */}
       <div key={ids[0]} className="flex items-start gap-2">
-        {badge('S', 'bg-green-600')}
+        {badge('S', 'bg-green-600')}   {/* green = semantic start color, intentional */}
         <div className="flex-1">
           <AddressInput
             value={addresses[0]}
@@ -57,7 +57,7 @@ export default function AddressCardList({ addresses, setAddresses, roundTrip }) 
               value={addresses[0] || ''}
               disabled
               placeholder="Returns to start"
-              className="w-full cursor-not-allowed rounded-md border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-500 shadow-sm"
+              className="w-full cursor-not-allowed rounded-md border border-[--ml-border] bg-[--ml-ground] px-3 py-2 text-sm text-[--ml-muted] shadow-sm"
             />
           ) : (
             <AddressInput
@@ -78,7 +78,7 @@ export default function AddressCardList({ addresses, setAddresses, roundTrip }) 
 
       {middleAddresses.map((addr, i) => (
         <div key={ids[i + 1]} className="flex items-start gap-2">
-          {badge(i + 1, 'bg-blue-600')}
+          {badge(i + 1, 'bg-[--ml-accent-fg]')}
           <div className="flex-1">
             <AddressInput
               value={addr}
@@ -89,7 +89,7 @@ export default function AddressCardList({ addresses, setAddresses, roundTrip }) 
           <button
             type="button"
             onClick={() => removeAt(i + 1)}
-            className="mt-1 rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-red-600"
+            className="mt-1 rounded p-1 text-[--ml-muted] hover:bg-[--ml-ground] hover:text-red-600"
             aria-label={`Remove stop ${i + 1}`}
           >
             ×
@@ -101,7 +101,7 @@ export default function AddressCardList({ addresses, setAddresses, roundTrip }) 
         type="button"
         onClick={addStop}
         disabled={addresses.length >= MAX_STOPS}
-        className="w-full rounded-md border border-dashed border-slate-300 py-2 text-sm text-slate-500 hover:border-blue-400 hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-40"
+        className="w-full rounded-md border border-dashed border-[--ml-border] py-2 text-sm text-[--ml-muted] hover:border-[--ml-accent-fg] hover:text-[--ml-accent-fg] disabled:cursor-not-allowed disabled:opacity-40"
       >
         + Add stop
       </button>

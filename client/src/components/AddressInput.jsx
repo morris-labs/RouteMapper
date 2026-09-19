@@ -113,7 +113,7 @@ export default function AddressInput({ value, onChange, placeholder }) {
         }}
         onFocus={() => setOpen(true)}
         placeholder={placeholder ?? 'Enter an address'}
-        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        className="w-full rounded-md border border-[--ml-border] bg-[--ml-surface] px-3 py-2 text-sm text-[--ml-ink] shadow-sm focus:border-[--ml-accent-fg] focus:outline-none focus:ring-1 focus:ring-[--ml-accent-fg]"
       />
       {showMenu &&
         createPortal(
@@ -125,10 +125,10 @@ export default function AddressInput({ value, onChange, placeholder }) {
               left: menuRect.left,
               width: menuRect.width,
             }}
-            className="z-50 max-h-64 overflow-y-auto rounded-md border border-slate-200 bg-white shadow-lg"
+            className="z-50 max-h-64 overflow-y-auto rounded-md border border-[--ml-border] bg-[--ml-surface] shadow-lg"
           >
             {loading && predictions.length === 0 && (
-              <li className="px-3 py-2 text-sm text-slate-400">Searching…</li>
+              <li className="px-3 py-2 text-sm text-[--ml-muted]">Searching…</li>
             )}
             {predictions.map((p) => (
               <li
@@ -137,11 +137,11 @@ export default function AddressInput({ value, onChange, placeholder }) {
                   e.preventDefault();
                   selectPrediction(p);
                 }}
-                className="cursor-pointer px-3 py-2 text-sm hover:bg-blue-50"
+                className="cursor-pointer px-3 py-2 text-sm hover:bg-[--ml-accent-bg]"
               >
-                <div className="font-medium text-slate-900">{p.primaryText || p.description}</div>
+                <div className="font-medium text-[--ml-ink]">{p.primaryText || p.description}</div>
                 {p.secondaryText && (
-                  <div className="text-xs text-slate-500">{p.secondaryText}</div>
+                  <div className="text-xs text-[--ml-muted]">{p.secondaryText}</div>
                 )}
               </li>
             ))}

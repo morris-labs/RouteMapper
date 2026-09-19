@@ -20,15 +20,15 @@ export default function OptionsPanel({ options, setOptions }) {
   }
 
   return (
-    <div className="space-y-3 rounded-md border border-slate-200 bg-white p-3 text-sm">
+    <div className="space-y-3 rounded-md border border-[--ml-border] bg-[--ml-surface] p-3 text-sm">
       <div>
-        <label className="block text-xs font-medium uppercase tracking-wide text-slate-500">
+        <label className="block text-xs font-medium uppercase tracking-wide text-[--ml-muted]">
           Travel mode
         </label>
         <select
           value={options.travelMode}
           onChange={(e) => setOptions({ ...options, travelMode: e.target.value })}
-          className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm"
+          className="mt-1 w-full rounded-md border border-[--ml-border] bg-[--ml-surface] px-2 py-1.5 text-sm text-[--ml-ink]"
         >
           {TRAVEL_MODES.map((m) => (
             <option key={m.value} value={m.value}>{m.label}</option>
@@ -41,7 +41,7 @@ export default function OptionsPanel({ options, setOptions }) {
           type="checkbox"
           checked={options.roundTrip}
           onChange={(e) => setOptions({ ...options, roundTrip: e.target.checked })}
-          className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+          className="h-4 w-4 rounded border-[--ml-border] text-[--ml-accent-fg] focus:ring-[--ml-accent-fg]"
         />
         <span>Return to start (round trip)</span>
       </label>
@@ -53,7 +53,7 @@ export default function OptionsPanel({ options, setOptions }) {
               type="checkbox"
               checked={options.avoid.includes(opt.value)}
               onChange={() => toggleAvoid(opt.value)}
-              className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+              className="h-4 w-4 rounded border-[--ml-border] text-[--ml-accent-fg] focus:ring-[--ml-accent-fg]"
             />
             <span>{opt.label}</span>
           </label>
