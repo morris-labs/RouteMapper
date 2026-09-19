@@ -91,7 +91,7 @@ fun MapScreen(viewModel: RouteViewModel) {
                 Button(
                     onClick = {
                         context.startActivity(
-                            buildMapsNavIntent(route, state.options.travelMode)
+                            buildMapsNavIntent(route, state.options.travelMode, state.options.avoid)
                         )
                     }
                 ) {

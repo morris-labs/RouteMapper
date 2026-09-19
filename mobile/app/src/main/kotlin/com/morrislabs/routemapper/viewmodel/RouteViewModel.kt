@@ -17,10 +17,11 @@ data class RouteOptions(
 )
 
 data class RouteUiState(
-    val addresses: List<String> = listOf("", ""),
+    // Two fixed slots (origin + destination) plus two default other-stop slots.
+    val addresses: List<String> = listOf("", "", "", ""),
     // Stable per-slot IDs so LazyColumn keys don't shift on removal.
-    val addressIds: List<Long> = listOf(0L, 1L),
-    val nextAddressId: Long = 2L,
+    val addressIds: List<Long> = listOf(0L, 1L, 2L, 3L),
+    val nextAddressId: Long = 4L,
     val options: RouteOptions = RouteOptions(),
     val route: RouteResponse? = null,
     // Increments on each successful route; lets PlanScreen navigate exactly once per result.

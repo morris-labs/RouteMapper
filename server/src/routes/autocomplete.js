@@ -15,7 +15,7 @@ router.all('/', async (req, res, next) => {
   }
 
   const sessiontoken = req.method === 'POST' ? req.body?.sessiontoken : req.query.sessiontoken;
-  const body = { input, includedPrimaryTypes: ['street_address', 'premise', 'subpremise'] };
+  const body = { input };
   if (sessiontoken) body.sessionToken = String(sessiontoken);
 
   try {

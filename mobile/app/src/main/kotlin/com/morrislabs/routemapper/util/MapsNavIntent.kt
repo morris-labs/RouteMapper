@@ -7,7 +7,7 @@ import com.morrislabs.routemapper.data.models.RouteResponse
 // Maps URL waypoints are capped at 9 intermediate stops (origin + 9 + destination = 11 total).
 const val MAPS_NAV_MAX_STOPS = 11
 
-fun buildMapsNavIntent(route: RouteResponse, travelMode: String): Intent {
+fun buildMapsNavIntent(route: RouteResponse, travelMode: String, avoid: List<String> = emptyList()): Intent {
     // Truncate to the Maps cap; the first MAPS_NAV_MAX_STOPS stops in optimized order.
     val stops = route.orderedStops.take(MAPS_NAV_MAX_STOPS)
     val middle = stops.drop(1).dropLast(1)
@@ -27,6 +27,9 @@ fun buildMapsNavIntent(route: RouteResponse, travelMode: String): Intent {
         .apply {
             if (middle.isNotEmpty()) {
                 appendQueryParameter("waypoints", middle.joinToString("|"))
+            }
+            if (avoid.isNotEmpty()) {
+                appendQueryParameter("avoid", avoid.joinToString("|"))
             }
         }
         .appendQueryParameter("travelmode", mode)

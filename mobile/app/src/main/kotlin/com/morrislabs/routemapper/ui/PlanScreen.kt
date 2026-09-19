@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
@@ -25,13 +26,15 @@ fun PlanScreen(viewModel: RouteViewModel, onNavigateToMap: () -> Unit) {
     val startAddr = addresses.firstOrNull()?.trim() ?: ""
     val endAddr = addresses.lastOrNull()?.trim() ?: ""
     val middleAddrs = addresses.drop(1).dropLast(1).map { it.trim() }.filter { it.isNotEmpty() }
+    val middleAddresses = addresses.drop(1).dropLast(1)
+    val middleIds = state.addressIds.drop(1).dropLast(1)
+
     val hasRoute = startAddr.isNotEmpty() && if (state.options.roundTrip) {
         middleAddrs.isNotEmpty()
     } else {
         endAddr.isNotEmpty() || middleAddrs.isNotEmpty()
     }
 
-    // Effective address list that was (or will be) sent to the API.
     val shareAddresses = when {
         state.options.roundTrip -> listOf(startAddr) + middleAddrs
         endAddr.isNotEmpty() -> listOf(startAddr) + middleAddrs + endAddr
@@ -41,7 +44,6 @@ fun PlanScreen(viewModel: RouteViewModel, onNavigateToMap: () -> Unit) {
     var copied by remember { mutableStateOf(false) }
     val clipboard = LocalClipboardManager.current
 
-    // Reset the copy confirmation after a short delay (mirrors web app behaviour).
     LaunchedEffect(copied) {
         if (copied) {
             delay(1500)
@@ -74,21 +76,69 @@ fun PlanScreen(viewModel: RouteViewModel, onNavigateToMap: () -> Unit) {
             Spacer(Modifier.height(4.dp))
         }
 
-        // key = stable slot ID so autocomplete state doesn't bleed to the wrong card
-        // after a stop is removed from the middle of the list.
+        // Origin — always first
+        item(key = state.addressIds.firstOrNull() ?: 0L) {
+            AddressCard(
+                index = 0,
+                address = addresses.firstOrNull() ?: "",
+                isStart = true,
+                isEnd = false,
+                roundTrip = false,
+                startAddress = "",
+                onAddressChange = { viewModel.updateAddress(0, it) },
+                onRemove = {}
+            )
+        }
+
+        // Destination — always second; locked to origin when round trip is on
+        item(key = state.addressIds.lastOrNull() ?: 1L) {
+            AddressCard(
+                index = lastIdx,
+                address = addresses.lastOrNull() ?: "",
+                isStart = false,
+                isEnd = true,
+                roundTrip = state.options.roundTrip,
+                startAddress = startAddr,
+                onAddressChange = { viewModel.updateAddress(lastIdx, it) },
+                onRemove = {}
+            )
+        }
+
+        // Other stops section header
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    "Other stops",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    "${middleAddresses.size} of 23",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        // Intermediate stops — keyed by stable slot ID so autocomplete state
+        // doesn't bleed to the wrong card after a stop is removed.
         itemsIndexed(
-            items = addresses,
-            key = { i, _ -> state.addressIds.getOrElse(i) { i.toLong() } }
+            items = middleAddresses,
+            key = { i, _ -> middleIds.getOrElse(i) { i.toLong() } }
         ) { i, addr ->
             AddressCard(
-                index = i,
+                index = i + 1,
                 address = addr,
-                isStart = i == 0,
-                isEnd = i == lastIdx,
-                roundTrip = state.options.roundTrip,
-                startAddress = addresses.firstOrNull() ?: "",
-                onAddressChange = { viewModel.updateAddress(i, it) },
-                onRemove = { viewModel.removeStop(i) }
+                isStart = false,
+                isEnd = false,
+                roundTrip = false,
+                startAddress = "",
+                onAddressChange = { viewModel.updateAddress(i + 1, it) },
+                onRemove = { viewModel.removeStop(i + 1) }
             )
         }
 
@@ -98,7 +148,7 @@ fun PlanScreen(viewModel: RouteViewModel, onNavigateToMap: () -> Unit) {
                 enabled = addresses.size < 25,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("+ Add stop (${addresses.size - 2}/${25 - 2})")
+                Text("+ Add stop")
             }
         }
 
@@ -132,8 +182,6 @@ fun PlanScreen(viewModel: RouteViewModel, onNavigateToMap: () -> Unit) {
             item { ResultsPanel(route = route) }
 
             item {
-                // Use orderedStops (optimized order) and cap at the Maps limit so the
-                // share link stays consistent with what the Navigate button will navigate.
                 val linkStops = route.orderedStops.take(MAPS_NAV_MAX_STOPS)
                 OutlinedButton(
                     onClick = {
